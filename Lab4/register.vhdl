@@ -26,8 +26,7 @@ signal all_registers : registerFile := (others => (others => '0'));
     out_a <= all_registers(to_integer(unsigned(read_a)));
     out_b <= all_registers(to_integer(unsigned(read_b)));
 
-
-    regFile : process(reset, clk, write)
+    regFile : process(reset, clk, write, write_address)
     begin
       if reset = '1' then
         for i in 0 to 31 loop
