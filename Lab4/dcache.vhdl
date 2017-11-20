@@ -20,7 +20,7 @@ type cache is array(31 downto 0) of std_logic_vector(31 downto 0);
 signal data_cache : cache := (others => (others => '0'));
 
 	begin
-	
+	data_output <= data_cache(to_integer(unsigned(address)));
 	dataCache : process(reset, clk, write, address)
 	begin
 		if reset = '1' then
@@ -32,7 +32,6 @@ signal data_cache : cache := (others => (others => '0'));
 			data_cache(to_integer(unsigned(address))) <= din;
 		  end if;
 		end if;
-		data_output <= data_cache(to_integer(unsigned(address)));
 	end process;
 
 end DCImplementation;
