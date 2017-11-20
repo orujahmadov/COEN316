@@ -24,6 +24,7 @@ signal all_registers : registerFile := (others => (others => '0'));
   begin
     out_a <= all_registers(to_integer(unsigned(read_a)));
     out_b <= all_registers(to_integer(unsigned(read_b)));
+
     regFile : process(reset, clk, write)
     begin
       if reset = '1' then
