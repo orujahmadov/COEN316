@@ -27,23 +27,23 @@ port(
 end control_unit;
 
 architecture implementation of control_unit is
-  -- Signals
 
 begin
-  process (opcode)
+
+  process (opcode, func_code)
   begin
     case opcode is
 
-    -- R-type instruction
+    -- R-type instruction and JR
       when "000000" =>
        -- Common outputs. These are same for all R-type instructions
 
        -- Single bit outputs
-         reg_write    <= "1";
-         reg_dst      <= "1";
-         reg_in_src   <= "1";
-         alu_src      <= "0";
-         data_write   <= "0";
+         reg_write    <= '1';
+         reg_dst      <= '1';
+         reg_in_src   <= '1';
+         alu_src      <= '0';
+         data_write   <= '0';
 
        -- Two bit outputs
          branch_type <= "00";
@@ -52,39 +52,56 @@ begin
          case func_code is
            -- Add
             when "100000" =>
-              add_sub     <= "0";
+              add_sub     <= '0';
               logic_func  <= "00";
               func        <= "10";
           -- Subtract
             when "100010" =>
-              add_sub     <= "1";
+              add_sub     <= '1';
               logic_func  <= "00";
               func        <= "10";
             -- SLT
             when "101010" =>
-             add_sub     <= "1";
+             add_sub     <= '1';
              logic_func  <= "00";
              func        <= "01";
           -- AND
             when "100100" =>
-             add_sub     <= "1";
+             add_sub     <= '1';
              logic_func  <= "00";
              func        <= "11";
           -- OR
-            when "100000" =>
-              add_sub     <= "1";
+            when "100101" =>
+              add_sub     <= '1';
               logic_func  <= "01";
               func        <= "11";
           -- XOR
-            when "100010" =>
-              add_sub     <= "1";
+            when "100110" =>
+              add_sub     <= '1';
               logic_func  <= "10";
               func        <= "11";
           -- NOR
-            when "100010" =>
-              add_sub     <= "1";
+            when "100111" =>
+              add_sub     <= '1';
               logic_func  <= "11";
               func        <= "11";
+			  
+		  -- JR is also here
+			when "001000" =>
+			    -- Single bit outputs
+			  reg_write    <= '0';
+			  reg_dst      <= '0';
+			  reg_in_src   <= '0';
+			  alu_src      <= '0';
+			  add_sub      <= '0';
+			  data_write   <= '0';
+
+			-- Two bit outputs
+			  logic_func  <= "00";
+			  func        <= "00";
+			  branch_type <= "00";
+			  pc_sel      <= "10";
+			  
           -- Should not happen
             when others =>
               null;
@@ -95,12 +112,12 @@ begin
       -- LUI
       when "001111" =>
       -- Single bit outputs
-        reg_write    <= "1";
-        reg_dst      <= "1";
-        reg_in_src   <= "1";
-        alu_src      <= "0";
-        add_sub      <= "1";
-        data_write   <= "0";
+        reg_write    <= '1';
+        reg_dst      <= '1';
+        reg_in_src   <= '1';
+        alu_src      <= '0';
+        add_sub      <= '1';
+        data_write   <= '0';
 
       -- Two bit outputs
         logic_func  <= "00";
@@ -111,12 +128,12 @@ begin
       -- SLTI
       when "001010" =>
       -- Single bit outputs
-        reg_write    <= "1";
-        reg_dst      <= "0";
-        reg_in_src   <= "1";
-        alu_src      <= "1";
-        add_sub      <= "1";
-        data_write   <= "0";
+        reg_write    <= '1';
+        reg_dst      <= '0';
+        reg_in_src   <= '1';
+        alu_src      <= '1';
+        add_sub      <= '1';
+        data_write   <= '0';
 
       -- Two bit outputs
         logic_func  <= "00";
@@ -127,12 +144,12 @@ begin
       -- ADDI
       when "001000" =>
       -- Single bit outputs
-        reg_write    <= "1";
-        reg_dst      <= "0";
-        reg_in_src   <= "1";
-        alu_src      <= "1";
-        add_sub      <= "0";
-        data_write   <= "0";
+        reg_write    <= '1';
+        reg_dst      <= '0';
+        reg_in_src   <= '1';
+        alu_src      <= '1';
+        add_sub      <= '0';
+        data_write   <= '0';
 
       -- Two bit outputs
         logic_func  <= "00";
@@ -143,12 +160,12 @@ begin
      --  ANDI
      when "001100" =>
      -- Single bit outputs
-       reg_write    <= "1";
-       reg_dst      <= "0";
-       reg_in_src   <= "1";
-       alu_src      <= "1";
-       add_sub      <= "0";
-       data_write   <= "0";
+       reg_write    <= '1';
+       reg_dst      <= '0';
+       reg_in_src   <= '1';
+       alu_src      <= '1';
+       add_sub      <= '0';
+       data_write   <= '0';
 
      -- Two bit outputs
        logic_func  <= "01";
@@ -159,12 +176,12 @@ begin
     -- ORI
     when "001101" =>
     -- Single bit outputs
-      reg_write    <= "1";
-      reg_dst      <= "0";
-      reg_in_src   <= "1";
-      alu_src      <= "1";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '1';
+      reg_dst      <= '0';
+      reg_in_src   <= '1';
+      alu_src      <= '1';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "10";
@@ -175,12 +192,12 @@ begin
     -- XORI
     when "001110" =>
     -- Single bit outputs
-      reg_write    <= "1";
-      reg_dst      <= "0";
-      reg_in_src   <= "1";
-      alu_src      <= "1";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '1';
+      reg_dst      <= '0';
+      reg_in_src   <= '1';
+      alu_src      <= '1';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "11";
@@ -191,12 +208,12 @@ begin
     -- LW
     when "100011" =>
     -- Single bit outputs
-      reg_write    <= "1";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "1";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '1';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '1';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "10";
@@ -207,12 +224,12 @@ begin
     -- SW
     when "101011" =>
     -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "1";
-      add_sub      <= "0";
-      data_write   <= "1";
+      reg_write    <= '0';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '1';
+      add_sub      <= '0';
+      data_write   <= '1';
 
     -- Two bit outputs
       logic_func  <= "10";
@@ -223,12 +240,12 @@ begin
     -- BLTZ
     when "000001" =>
     -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "0";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '0';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '0';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "00";
@@ -239,12 +256,12 @@ begin
     -- BEQ
     when "000100" =>
     -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "0";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '0';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '0';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "00";
@@ -255,12 +272,12 @@ begin
     -- BNE
     when "000101" =>
     -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "0";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '0';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '0';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "00";
@@ -269,14 +286,14 @@ begin
       pc_sel      <= "00";
 
     -- JUMP
-    when "000101" =>
+    when "000010" =>
     -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "0";
-      add_sub      <= "0";
-      data_write   <= "0";
+      reg_write    <= '0';
+      reg_dst      <= '0';
+      reg_in_src   <= '0';
+      alu_src      <= '0';
+      add_sub      <= '0';
+      data_write   <= '0';
 
     -- Two bit outputs
       logic_func  <= "00";
@@ -284,26 +301,10 @@ begin
       branch_type <= "00";
       pc_sel      <= "01";
 
-    -- JUMP RS
-    when "000101" =>
-    -- Single bit outputs
-      reg_write    <= "0";
-      reg_dst      <= "0";
-      reg_in_src   <= "0";
-      alu_src      <= "0";
-      add_sub      <= "0";
-      data_write   <= "0";
-
-    -- Two bit outputs
-      logic_func  <= "00";
-      func        <= "00";
-      branch_type <= "00";
-      pc_sel      <= "10";
-
     when others =>
       null;
 
-      end case;
+    end case;
   end process;
 
 end implementation;
