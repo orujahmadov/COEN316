@@ -6,9 +6,9 @@ use ieee.numeric_std.all;
 
 entity sign_extend is
 port(
-  immediate_field : in std_logic_vector(15 downto 0);
- func : in std_logic_vector(1 downto 0);
- output_address : out std_logic_vector(31 downto 0));
+	immediate_field : in std_logic_vector(15 downto 0);
+	func : 			  in std_logic_vector(1 downto 0);
+	output_address : out std_logic_vector(31 downto 0));
 end sign_extend;
 
 architecture SImplementation of sign_extend is
@@ -19,16 +19,15 @@ begin
   begin
     if func = "00" then
       output_address <= immediate_field & "0000000000000000";
-    elsif func = "01" or funct = "10" then
-      if immediate_field(15) = "1" then
-        output_address <= "1111111111111111" & immediate_field;
-      elsif immediate_field(15) = "0"
-        output_address <= "0000000000000000" & immediate_field;
-      end if;
     elsif func = "11" then
-      output_address <= "0000000000000000" & immediate_field;
+		output_address <= "0000000000000000" & immediate_field;
+    else
+		if immediate_field(15) = '1' then
+			output_address <= "1111111111111111" & immediate_field;
+		elsif immediate_field(15) = '0' then
+			output_address <= "0000000000000000" & immediate_field;
+		end if;
     end if;
-
   end process;
 
 end SImplementation;

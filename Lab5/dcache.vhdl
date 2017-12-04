@@ -1,7 +1,7 @@
 -- PC Register
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_signed.all;
+use IEEE.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 entity dcache is
@@ -21,17 +21,19 @@ signal data_cache : cache := (others => (others => '0'));
 
 begin
 
-  dataCache : process(reset, clk, data_write, address)
-  begin
-    if reset = '1' then
-      for i in 0 to 31 loop
-        data_cache(i) <= (others => '0');
-      end loop;
-    elsif clk = '1'  and clk'event then
-      if write = '1' then
-        data_cache(to_integer(unsigned(address))) <= din;
-      end if;
-    end if;
-  end process;
+	data_output <= data_cache(to_integer(unsigned(address)));
+	
+	dataCache : process(reset, clk, data_write, address)
+	begin
+		if reset = '1' then
+		  for i in 0 to 31 loop
+			data_cache(i) <= (others => '0');
+		  end loop;
+		elsif clk = '1'  and clk'event then
+		  if data_write = '1' then
+			data_cache(to_integer(unsigned(address))) <= din;
+		  end if;
+		end if;
+	end process;
 
 end DCImplementation;
