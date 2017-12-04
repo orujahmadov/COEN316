@@ -30,6 +30,7 @@ architecture implementation of control_unit is
   -- Signals
 
 begin
+  
   process (opcode)
   begin
     case opcode is
@@ -151,7 +152,7 @@ begin
        data_write   <= "0";
 
      -- Two bit outputs
-       logic_func  <= "01";
+       logic_func  <= "00";
        func        <= "11";
        branch_type <= "00";
        pc_sel      <= "00";
@@ -167,7 +168,7 @@ begin
       data_write   <= "0";
 
     -- Two bit outputs
-      logic_func  <= "10";
+      logic_func  <= "01";
       func        <= "11";
       branch_type <= "00";
       pc_sel      <= "00";
@@ -183,7 +184,7 @@ begin
       data_write   <= "0";
 
     -- Two bit outputs
-      logic_func  <= "11";
+      logic_func  <= "10";
       func        <= "11";
       branch_type <= "00";
       pc_sel      <= "00";
