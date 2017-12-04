@@ -7,8 +7,8 @@ use ieee.numeric_std.all;
 entity control_unit is
 port(
   -- INPUTS
-  func_code:      in std_logic_vector(5 downto 0);
   opcode:         in std_logic_vector(5 downto 0);
+  func_code:      in std_logic_vector(5 downto 0);
 
   -- Single bit outputs
   reg_write:     out std_logic;

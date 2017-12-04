@@ -1,7 +1,7 @@
 -- Next address calculator for
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_signed.all;
+use IEEE.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 entity cpu is
@@ -83,15 +83,6 @@ architecture implementation of cpu is
     data : out std_logic_vector(31 downto 0));
   end component;
 
-  -- PC Register Cache Component
-  component pc_register
-  port(
-   pc : in std_logic_vector(31 downto 0);
-   reset : in std_logic;
-   clk : in std_logic;
-   next_pc : out std_logic_vector(31 downto 0));
-  end component;
-
   -- Sign Extension Component
   component sign_extend
   port(
@@ -115,11 +106,11 @@ architecture implementation of cpu is
   end component;
 
   -- Register Component
-  component register_file
+  component regfile
   port( din : in std_logic_vector(31 downto 0);
      reset : in std_logic;
      clk : in std_logic;
-     write : in std_logic;
+     reg_write : in std_logic;
      read_a : in std_logic_vector(4 downto 0);
      read_b : in std_logic_vector(4 downto 0);
      write_address : in std_logic_vector(4 downto 0);
@@ -143,8 +134,8 @@ architecture implementation of cpu is
   component control_unit
   port(
     -- INPUTS
+	opcode:         in std_logic_vector(5 downto 0);
     func_code:      in std_logic_vector(5 downto 0);
-    opcode:         in std_logic_vector(5 downto 0);
 
     -- Single bit outputs
     reg_write:     out std_logic;
@@ -163,41 +154,48 @@ architecture implementation of cpu is
 
 begin
 
+  -- Instruction Cache
+  IC: icache port map (address => pc(4 downto 0), data => instruction);
+
+  -- Control Unit.
+  CU: control_unit port map (opcode => instruction(31 downto 26), func_code => instruction(5 downto 0), reg_write => reg_write, reg_dst => reg_dst, reg_in_src => reg_in_src, alu_src => alu_src, add_sub => add_sub, data_write => data_write, logic_func => logic_func, func => func, branch_type => branch_type, pc_sel => pc_sel);
+
+  -- NEXT Address
+  NA: next_address port map (rs => instruction(25 downto 21), rt => instruction(20 downto 16), pc => pc, target_address => instruction(25 downto 0), branch_type => branch_type, pc_sel => pc_sel, next_pc => pc);
+
+  -- First MUX use to choose reg destination address for write
+  MUX1: mux2to1_5bit port map (X => instruction(20 downto 16), Y => instruction(15 downto 11), S => reg_dst, Z => write_reg_address);
+
+  -- Register File
+  RF: regfile port map (din => write_reg_data, reset => reset, clk => clk, reg_write => reg_write, read_a => instruction(25 downto 21), read_b => instruction(20 downto 16), write_address => write_reg_address, out_a => reg_out_a, out_b => reg_out_b);
+
+  -- Sign Extend
+  SE: sign_extend port map (immediate_field => instruction(15 downto 0), func => func, output_address => sign_extend_output);
+
+  -- Second MUX use to choose rt for ALU
+  MUX2: mux2to1_32bit port map (X => reg_out_b, Y => sign_extend_output, S => alu_src, Z => alu_y);
+
+  -- ALU
+  ALUCP: ALU port map (x => reg_out_a, y => alu_y, add_sub => add_sub, logic_func => logic_func, func => func, output => alu_output, overflow => overflow, zero => zero);
+
+  -- Data Cache
+  DC: dcache port map (address => alu_output(4 downto 0), din => reg_out_b, data_write => data_write, reset => reset, clk => clk, data_output => dcache_output);
+
+  -- Third MUX use to choose Write back data
+  MUX3: mux2to1_32bit port map (X => dcache_output, Y => alu_output, S => reg_in_src, Z => write_reg_data);
+  
   rs_out <= reg_out_a(3 downto 0);
   rt_out <= reg_out_b(3 downto 0);
   pc_out <= pc(3 downto 0);
-
-  -- PC Register
-  PC_R: pc_register port map (pc, reset, clk, pc);
-
-  -- Instruction Cache
-  IC: icache port map (pc(4 downto 0), instruction);
-
-  -- Control Unit
-  CU: control_unit port map (instruction(31 downto 26), instruction(31 downto 26), reg_write, reg_dst, reg_in_src, alu_src, add_sub, data_write, logic_func, func, branch_type, pc_sel);
-
-  -- NEXT Address
-  NA: next_address port map (instruction(20 downto 16), instruction(25 downto 21), pc, instruction(25 downto 0), branch_type, pc_sel, pc);
-
-  -- First MUX use to choose reg destination address for write
-  MUX1: mux2to1_5bit port map (instruction(20 downto 16), instruction(15 downto 11), reg_dst, write_reg_address);
-
-  -- Register File
-  RF: register_file port map (write_reg_data, reset, clk, reg_write, instruction(25 downto 21), instruction(20 downto 16), write_reg_address, reg_out_a, reg_out_b);
-
-  -- Sign Extend
-  SE: sign_extend port map (instruction(15 downto 0), func, sign_extend_output);
-
-  -- Second MUX use to choose rt for ALU
-  MUX2: mux2to1_32bit port map (reg_out_b, sign_extend_output, alu_src, alu_y);
-
-  -- ALU
-  ALUCP: ALU port map (reg_out_a, alu_y, add_sub, logic_func, func, alu_output, overflow, zero);
-
-  -- Data Cache
-  DC: dcache port map (alu_output(4 downto 0), reg_out_b, data_write, reset, clk, dcache_output);
-
-  -- Third MUX use to choose Write back data
-  MUX3: mux2to1_32bit port map (dcache_output, alu_output, reg_in_src, write_reg_data);
+  
+  
+  pcRegister : process(reset, clk)
+  begin
+    if reset = '1' then
+        pc <= (others => '0');
+    elsif clk = '1'  and clk'event then
+      pc <= pc;
+    end if;
+  end process;
 
 end implementation;
