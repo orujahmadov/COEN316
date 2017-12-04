@@ -45,7 +45,7 @@ architecture implementation of cpu is
   signal logic_func:    std_logic_vector(1 downto 0);
   signal func:          std_logic_vector(1 downto 0);
   signal branch_type:   std_logic_vector(1 downto 0);
-  signal pc_sel:        std_logic_vector(1 downto 0));
+  signal pc_sel:        std_logic_vector(1 downto 0);
 
   ------------------------------
 
@@ -131,7 +131,7 @@ architecture implementation of cpu is
   component next_address
   port(
        -- two register inputs
-     rt, rs : in std_logic_vector(31 downto 0);
+     rt, rs : in std_logic_vector(4 downto 0);
      pc : in std_logic_vector(31 downto 0);
      target_address : in std_logic_vector(25 downto 0);
      branch_type : in std_logic_vector(1 downto 0);
@@ -176,7 +176,7 @@ begin
   NA: next_address port map (instruction(20 downto 16), instruction(25 downto 21), pc, instruction(25 downto 0), branch_type, pc_sel, pc);
 
   -- First MUX use to choose reg destination address for write
-  MUX1: mux2to1_5bit port map (instruction(20 downto 16), instruction(16 downto 11), reg_dst, write_reg_address);
+  MUX1: mux2to1_5bit port map (instruction(20 downto 16), instruction(15 downto 11), reg_dst, write_reg_address);
 
   -- Register File
   RF: register_file port map (write_reg_data, reset, clk, reg_write, instruction(25 downto 21), instruction(20 downto 16), write_reg_address, reg_out_a, reg_out_b);
@@ -188,10 +188,10 @@ begin
   MUX2: mux2to1_32bit port map (reg_out_b, sign_extend_output, alu_src, alu_y);
 
   -- ALU
-  ALU: ALU port map (reg_out_a, alu_y, add_sub, logic_func, func, alu_output, overflow, zero);
+  ALUCP: ALU port map (reg_out_a, alu_y, add_sub, logic_func, func, alu_output, overflow, zero);
 
   -- Data Cache
-  DC: dcache port map (alu_output(4 downto 0), reg_out_b, data_write, reset, clk => clk, dcache_output);
+  DC: dcache port map (alu_output(4 downto 0), reg_out_b, data_write, reset, clk, dcache_output);
 
   -- Third MUX use to choose Write back data
   MUX3: mux2to1_32bit port map (dcache_output, alu_output, reg_in_src, write_reg_data);
