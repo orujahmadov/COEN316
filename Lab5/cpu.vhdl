@@ -163,6 +163,10 @@ architecture implementation of cpu is
 
 begin
 
+  rs_out <= reg_out_a(3 downto 0);
+  rt_out <= reg_out_b(3 downto 0);
+  pc_out <= pc(3 downto 0);
+
   -- PC Register
   PC_R: pc_register port map (pc, reset, clk, pc);
 
