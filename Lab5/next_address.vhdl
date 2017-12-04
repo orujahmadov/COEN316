@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 
 entity next_address is
 port(
-  rt, rs : in std_logic_vector(4 downto 0);
+  rt, rs : in std_logic_vector(31 downto 0);
  -- two register inputs
  pc : in std_logic_vector(31 downto 0);
  target_address : in std_logic_vector(25 downto 0);
@@ -78,7 +78,7 @@ begin
 
       			-- Jump Register
 			when "10" => -- jump register: PC = contents of register rs
-				next_pc <= "000000" & rs & "000000000000000000000" ;
+				next_pc <= rs;
 
       			-- Not used
 			when others => -- shouldn't happen, PC = PC + 1

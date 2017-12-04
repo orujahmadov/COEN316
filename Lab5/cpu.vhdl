@@ -1,7 +1,7 @@
--- Next address calculator for
+-- CPU
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_unsigned.all;
+use IEEE.std_logic_signed.all;
 use ieee.numeric_std.all;
 
 entity cpu is
@@ -18,6 +18,7 @@ architecture implementation of cpu is
 
   -- Helper Signals ----------------------
   signal pc : std_logic_vector(31 downto 0);
+  signal next_pc : std_logic_vector(31 downto 0);
   signal instruction : std_logic_vector(31 downto 0);
 
   signal sign_extend_output:    std_logic_vector(31 downto 0);
@@ -122,7 +123,7 @@ architecture implementation of cpu is
   component next_address
   port(
        -- two register inputs
-     rt, rs : in std_logic_vector(4 downto 0);
+     rt, rs : in std_logic_vector(31 downto 0);
      pc : in std_logic_vector(31 downto 0);
      target_address : in std_logic_vector(25 downto 0);
      branch_type : in std_logic_vector(1 downto 0);
@@ -157,17 +158,18 @@ begin
   -- Instruction Cache
   IC: icache port map (address => pc(4 downto 0), data => instruction);
 
-  -- Control Unit.
-  CU: control_unit port map (opcode => instruction(31 downto 26), func_code => instruction(5 downto 0), reg_write => reg_write, reg_dst => reg_dst, reg_in_src => reg_in_src, alu_src => alu_src, add_sub => add_sub, data_write => data_write, logic_func => logic_func, func => func, branch_type => branch_type, pc_sel => pc_sel);
 
-  -- NEXT Address
-  NA: next_address port map (rs => instruction(25 downto 21), rt => instruction(20 downto 16), pc => pc, target_address => instruction(25 downto 0), branch_type => branch_type, pc_sel => pc_sel, next_pc => pc);
-
-  -- First MUX use to choose reg destination address for write
+  -- First MUX use to choose reg destination address for Regfile
   MUX1: mux2to1_5bit port map (X => instruction(20 downto 16), Y => instruction(15 downto 11), S => reg_dst, Z => write_reg_address);
 
   -- Register File
   RF: regfile port map (din => write_reg_data, reset => reset, clk => clk, reg_write => reg_write, read_a => instruction(25 downto 21), read_b => instruction(20 downto 16), write_address => write_reg_address, out_a => reg_out_a, out_b => reg_out_b);
+
+  -- Control Unit.
+  CU: control_unit port map (opcode => instruction(31 downto 26), func_code => instruction(5 downto 0), reg_write => reg_write, reg_dst => reg_dst, reg_in_src => reg_in_src, alu_src => alu_src, add_sub => add_sub, data_write => data_write, logic_func => logic_func, func => func, branch_type => branch_type, pc_sel => pc_sel);
+
+  -- NEXT Address
+  NA: next_address port map (rs => reg_out_a, rt => reg_out_b, pc => pc, target_address => instruction(25 downto 0), branch_type => branch_type, pc_sel => pc_sel, next_pc => next_pc);
 
   -- Sign Extend
   SE: sign_extend port map (immediate_field => instruction(15 downto 0), func => func, output_address => sign_extend_output);
@@ -193,8 +195,8 @@ begin
   begin
     if reset = '1' then
         pc <= (others => '0');
-    elsif clk = '1'  and clk'event then
-      pc <= pc;
+    elsif clk = '1' and clk'event then
+        pc <= next_pc;
     end if;
   end process;
 

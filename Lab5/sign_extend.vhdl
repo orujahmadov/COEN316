@@ -20,7 +20,7 @@ begin
     if func = "00" then
       output_address <= immediate_field & "0000000000000000";
     elsif func = "11" then
-		output_address <= "0000000000000000" & immediate_field;
+      output_address <= "0000000000000000" & immediate_field;
     else
 		if immediate_field(15) = '1' then
 			output_address <= "1111111111111111" & immediate_field;

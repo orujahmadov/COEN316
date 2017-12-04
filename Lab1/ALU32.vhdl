@@ -26,7 +26,7 @@ signal subtract : std_logic_vector(31 downto 0);
 
 begin
 
-  P_ALU: process (add_sub, func)
+  P_ALU: process (add_sub, func, logic_func)
 
   begin
     -- Calculate result of adder subtracter

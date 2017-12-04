@@ -23,7 +23,7 @@ begin
 
 	data_output <= data_cache(to_integer(unsigned(address)));
 	
-	dataCache : process(reset, clk, data_write, address)
+	dataCache : process(reset, clk, data_write, address, din)
 	begin
 		if reset = '1' then
 		  for i in 0 to 31 loop
