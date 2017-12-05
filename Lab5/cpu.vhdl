@@ -93,7 +93,7 @@ architecture implementation of cpu is
   end component;
 
   -- ALU Component
-  component ALU
+  component alunew
   port(x, y : in std_logic_vector(31 downto 0);
      -- two input operands
      add_sub : in std_logic ; -- 0 = add , 1 = sub
@@ -178,7 +178,7 @@ begin
   MUX2: mux2to1_32bit port map (X => reg_out_b, Y => sign_extend_output, S => alu_src, Z => alu_y);
 
   -- ALU
-  ALUCP: ALU port map (x => reg_out_a, y => alu_y, add_sub => add_sub, logic_func => logic_func, func => func, output => alu_output, overflow => overflow, zero => zero);
+  ALUCP: alunew port map (x => reg_out_a, y => alu_y, add_sub => add_sub, logic_func => logic_func, func => func, output => alu_output, overflow => overflow, zero => zero);
 
   -- Data Cache
   DC: dcache port map (address => alu_output(4 downto 0), din => reg_out_b, data_write => data_write, reset => reset, clk => clk, data_output => dcache_output);
